@@ -2,13 +2,13 @@ package aliasmethod
 
 import (
 	"container/list"
+	"errors"
 	"math/rand"
 	"time"
-	"errors"
 )
 
 type AliasMethod struct {
-	alias 		[]int
+	alias       []int
 	probability []float64
 }
 
@@ -30,10 +30,10 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 	var p = make([]float64, len(prob))
 	copy(p, prob)
 
-	this.alias       = make([]int, len(p))
+	this.alias = make([]int, len(p))
 	this.probability = make([]float64, len(p))
 
-	var average float64 = 1.0 / float64(len(p))
+	var average = 1.0 / float64(len(p))
 
 	var small = list.New()
 	var large = list.New()
@@ -47,15 +47,15 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 	}
 
 	for {
-		var smallElement *list.Element = small.Back()
-		var largeElement *list.Element = large.Back()
+		var smallElement = small.Back()
+		var largeElement = large.Back()
 
 		if smallElement == nil || largeElement == nil {
 			break
 		}
 
-		var less int = 0;
-		var more int = 0;
+		var less = 0
+		var more = 0
 
 		if v, ok := smallElement.Value.(int); ok {
 			less = v
@@ -69,7 +69,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 
 		p[more] = p[more] + p[less] - average
 
-		if (p[more] >= 1.0 / float64(len(p))) {
+		if p[more] >= 1.0/float64(len(p)) {
 			large.PushBack(more)
 		} else {
 			small.PushBack(more)
@@ -80,7 +80,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 	}
 
 	for {
-		var smallElement *list.Element = small.Back()
+		var smallElement = small.Back()
 		if smallElement == nil {
 			break
 		}
@@ -91,7 +91,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 	}
 
 	for {
-		var largeElement *list.Element = large.Back()
+		var largeElement = large.Back()
 		if largeElement == nil {
 			break
 		}

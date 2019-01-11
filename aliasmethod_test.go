@@ -1,8 +1,8 @@
 package aliasmethod
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func Test_AliasMethod(t *testing.T) {
@@ -16,12 +16,11 @@ func Test_AliasMethod(t *testing.T) {
 	prizes["圣诞雪人"] = 0.15
 	prizes["谢谢参与"] = 0.2
 
-
 	var keys = make([]string, 0, len(prizes))
 	var values = make([]float64, 0, len(prizes))
 
 	for key, value := range prizes {
-		keys = append(keys,  key)
+		keys = append(keys, key)
 		values = append(values, value)
 	}
 
@@ -32,7 +31,7 @@ func Test_AliasMethod(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	for i:=0; i<500; i++ {
+	for i := 0; i < 500; i++ {
 		var index = aliasMethod.Next()
 
 		var key = keys[index]
