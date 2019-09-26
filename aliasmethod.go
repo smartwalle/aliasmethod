@@ -7,12 +7,17 @@ import (
 	"time"
 )
 
-type AliasMethod struct {
-	alias       []int
-	probability []float64
+type Probability interface {
+	Probability() float64
 }
 
-func NewAliasMethod(p []float64) (alias *AliasMethod, err error) {
+type AliasMethod struct {
+	alias          []int
+	probability    []float64
+	rowProbability []Probability
+}
+
+func NewAliasMethod(p []Probability) (alias *AliasMethod, err error) {
 	if p == nil {
 		return nil, errors.New("概率不能为空")
 	}
@@ -22,7 +27,14 @@ func NewAliasMethod(p []float64) (alias *AliasMethod, err error) {
 	}
 
 	alias = &AliasMethod{}
-	alias.preprocess(p)
+	alias.rowProbability = p
+
+	var values = make([]float64, 0, len(p))
+	for _, v := range p {
+		values = append(values, v.Probability())
+	}
+
+	alias.preprocess(values)
 	return alias, nil
 }
 
@@ -116,4 +128,9 @@ func (this *AliasMethod) Next() int {
 		return column
 	}
 	return this.alias[column]
+}
+
+func (this *AliasMethod) NextValue() interface{} {
+	var index = this.Next()
+	return this.rowProbability[index]
 }
