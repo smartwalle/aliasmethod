@@ -17,25 +17,31 @@ type AliasMethod struct {
 	rowProbability []Probability
 }
 
-func NewAliasMethod(pList []Probability) (alias *AliasMethod, err error) {
-	if pList == nil {
-		return nil, errors.New("概率不能为空")
+func NewAliasMethod() *AliasMethod {
+	var alias = &AliasMethod{}
+	return alias
+}
+
+func (this *AliasMethod) AddProbability(p Probability) {
+	if p == nil {
+		return
+	}
+	this.rowProbability = append(this.rowProbability, p)
+}
+
+func (this *AliasMethod) Prepare() error {
+	if len(this.rowProbability) == 0 {
+		return errors.New("概率不能为空")
 	}
 
-	if len(pList) == 0 {
-		return nil, errors.New("概率不能为空")
-	}
-
-	alias = &AliasMethod{}
-	alias.rowProbability = pList
-
-	var values = make([]float64, 0, len(pList))
-	for _, p := range pList {
+	var values = make([]float64, 0, len(this.rowProbability))
+	for _, p := range this.rowProbability {
 		values = append(values, p.Probability())
 	}
 
-	alias.preprocess(values)
-	return alias, nil
+	this.preprocess(values)
+
+	return nil
 }
 
 func (this *AliasMethod) preprocess(prob []float64) (err error) {
