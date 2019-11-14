@@ -125,7 +125,12 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 func (this *AliasMethod) Next() int {
 	rand.Seed(time.Now().UnixNano())
 
-	var column = rand.Intn(len(this.probability))
+	var proLen = len(this.probability)
+	if proLen == 0 {
+		return -1
+	}
+
+	var column = rand.Intn(proLen)
 	var f = rand.Float64()
 
 	var coinToss = f < this.probability[column]
@@ -138,5 +143,8 @@ func (this *AliasMethod) Next() int {
 
 func (this *AliasMethod) NextValue() interface{} {
 	var index = this.Next()
+	if index < 0 {
+		return nil
+	}
 	return this.rowProbability[index]
 }
