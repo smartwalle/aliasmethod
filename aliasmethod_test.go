@@ -12,25 +12,30 @@ type Christmas struct {
 }
 
 func (this *Christmas) Probability() float64 {
-	return this.p
+	var v = float64(this.p)
+	return v
 }
 
 func Test_AliasMethod(t *testing.T) {
-	var am = NewAliasMethod()
-
-	am.AddProbability(&Christmas{name: "圣诞老人", p: 0.05})
-	am.AddProbability(&Christmas{name: "圣诞树", p: 0.15})
-	am.AddProbability(&Christmas{name: "圣诞袜", p: 0.15})
-	am.AddProbability(&Christmas{name: "圣诞小鹿", p: 0.15})
-	am.AddProbability(&Christmas{name: "谢谢参与", p: 0.5})
-
-	if err := am.Prepare(); err != nil {
-		t.Fatal(err)
-	}
-
 	var results = make(map[string]int)
 
 	for i := 0; i < 100; i++ {
+		var am = NewAliasMethod()
+
+		am.AddProbability(&Christmas{name: "1", p: 10})
+		am.AddProbability(&Christmas{name: "2", p: 10})
+		am.AddProbability(&Christmas{name: "3", p: 10})
+		am.AddProbability(&Christmas{name: "4", p: 10})
+		am.AddProbability(&Christmas{name: "5", p: 10})
+		am.AddProbability(&Christmas{name: "6", p: 10})
+		am.AddProbability(&Christmas{name: "7", p: 10})
+		am.AddProbability(&Christmas{name: "8", p: 10})
+		am.AddProbability(&Christmas{name: "9", p: 10})
+		am.AddProbability(&Christmas{name: "10", p: 110})
+
+		if err := am.Prepare(); err != nil {
+			t.Fatal(err)
+		}
 		var p = am.NextValue()
 
 		var c = p.(*Christmas)

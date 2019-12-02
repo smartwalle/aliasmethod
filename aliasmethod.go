@@ -14,7 +14,7 @@ type Probability interface {
 type AliasMethod struct {
 	alias          []int
 	probability    []float64
-	rowProbability []Probability
+	rawProbability []Probability
 }
 
 func NewAliasMethod() *AliasMethod {
@@ -26,17 +26,27 @@ func (this *AliasMethod) AddProbability(p Probability) {
 	if p == nil {
 		return
 	}
-	this.rowProbability = append(this.rowProbability, p)
+	this.rawProbability = append(this.rawProbability, p)
 }
 
 func (this *AliasMethod) Prepare() error {
-	if len(this.rowProbability) == 0 {
+	if len(this.rawProbability) == 0 {
 		return errors.New("概率不能为空")
 	}
 
-	var values = make([]float64, 0, len(this.rowProbability))
-	for _, p := range this.rowProbability {
-		values = append(values, p.Probability())
+	var total float64 = 0
+	for _, p := range this.rawProbability {
+		total += p.Probability()
+	}
+
+	var scale float64 = 0
+	if total > 1.0 {
+		scale = total / 1.0
+	}
+
+	var values = make([]float64, 0, len(this.rawProbability))
+	for _, p := range this.rawProbability {
+		values = append(values, p.Probability()/scale)
 	}
 
 	this.preprocess(values)
@@ -146,5 +156,5 @@ func (this *AliasMethod) NextValue() interface{} {
 	if index < 0 {
 		return nil
 	}
-	return this.rowProbability[index]
+	return this.rawProbability[index]
 }
