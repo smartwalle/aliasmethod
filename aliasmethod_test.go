@@ -19,7 +19,7 @@ func (this *Christmas) Probability() float64 {
 func Test_AliasMethod(t *testing.T) {
 	var results = make(map[string]int)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		var am = NewAliasMethod()
 
 		am.AddProbability(&Christmas{name: "1", p: 10})

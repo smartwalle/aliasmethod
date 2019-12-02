@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	kProbability = 1.0
+)
+
 type Probability interface {
 	Probability() float64
 }
@@ -39,10 +43,7 @@ func (this *AliasMethod) Prepare() error {
 		total += p.Probability()
 	}
 
-	var scale float64 = 0
-	if total > 1.0 {
-		scale = total / 1.0
-	}
+	var scale = total / kProbability
 
 	var values = make([]float64, 0, len(this.rawProbability))
 	for _, p := range this.rawProbability {
@@ -61,7 +62,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 	this.alias = make([]int, len(p))
 	this.probability = make([]float64, len(p))
 
-	var average = 1.0 / float64(len(p))
+	var average = kProbability / float64(len(p))
 
 	var small = list.New()
 	var large = list.New()
@@ -97,7 +98,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 
 		p[more] = p[more] + p[less] - average
 
-		if p[more] >= 1.0/float64(len(p)) {
+		if p[more] >= kProbability/float64(len(p)) {
 			large.PushBack(more)
 		} else {
 			small.PushBack(more)
@@ -113,7 +114,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 			break
 		}
 		if v, ok := smallElement.Value.(int); ok {
-			this.probability[v] = 1.0
+			this.probability[v] = kProbability
 		}
 		small.Remove(smallElement)
 	}
@@ -124,7 +125,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 			break
 		}
 		if v, ok := largeElement.Value.(int); ok {
-			this.probability[v] = 1.0
+			this.probability[v] = kProbability
 		}
 		large.Remove(largeElement)
 	}
