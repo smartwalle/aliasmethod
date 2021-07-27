@@ -1,42 +1,41 @@
-package aliasmethod
+package aliasmethod_test
 
 import (
 	"fmt"
+	"github.com/smartwalle/aliasmethod"
 	"testing"
 )
 
 type Christmas struct {
-	name string
-	p    float64
-	c    int
+	name   string
+	weight int32
 }
 
-func (this *Christmas) Probability() float64 {
-	var v = float64(this.p)
-	return v
+func (this *Christmas) Weight() int32 {
+	return this.weight
 }
 
 func Test_AliasMethod(t *testing.T) {
 	var results = make(map[string]int)
 
 	for i := 0; i < 1000; i++ {
-		var am = NewAliasMethod()
+		var m = aliasmethod.New()
 
-		am.AddProbability(&Christmas{name: "1", p: 10})
-		am.AddProbability(&Christmas{name: "2", p: 10})
-		am.AddProbability(&Christmas{name: "3", p: 10})
-		am.AddProbability(&Christmas{name: "4", p: 10})
-		am.AddProbability(&Christmas{name: "5", p: 10})
-		am.AddProbability(&Christmas{name: "6", p: 10})
-		am.AddProbability(&Christmas{name: "7", p: 10})
-		am.AddProbability(&Christmas{name: "8", p: 10})
-		am.AddProbability(&Christmas{name: "9", p: 10})
-		am.AddProbability(&Christmas{name: "10", p: 110})
+		m.Add(&Christmas{name: "1", weight: 10})
+		m.Add(&Christmas{name: "2", weight: 10})
+		m.Add(&Christmas{name: "3", weight: 10})
+		m.Add(&Christmas{name: "4", weight: 10})
+		m.Add(&Christmas{name: "5", weight: 10})
+		m.Add(&Christmas{name: "6", weight: 10})
+		m.Add(&Christmas{name: "7", weight: 10})
+		m.Add(&Christmas{name: "8", weight: 10})
+		m.Add(&Christmas{name: "9", weight: 10})
+		m.Add(&Christmas{name: "10", weight: 110})
 
-		if err := am.Prepare(); err != nil {
+		if err := m.Prepare(); err != nil {
 			t.Fatal(err)
 		}
-		var p = am.NextValue()
+		var p = m.NextItem()
 
 		var c = p.(*Christmas)
 		results[c.name] = results[c.name] + 1

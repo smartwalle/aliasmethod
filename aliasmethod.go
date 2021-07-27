@@ -11,43 +11,45 @@ const (
 	kProbability = 1.0
 )
 
-type Probability interface {
-	Probability() float64
+type Item interface {
+	Weight() int32
 }
 
 type AliasMethod struct {
-	alias          []int
-	probability    []float64
-	rawProbability []Probability
+	alias       []int
+	probability []float64
+	items       []Item
+	r           *rand.Rand
 }
 
-func NewAliasMethod() *AliasMethod {
-	var alias = &AliasMethod{}
-	return alias
+func New() *AliasMethod {
+	var m = &AliasMethod{}
+	m.r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	return m
 }
 
-func (this *AliasMethod) AddProbability(p Probability) {
-	if p == nil {
+func (this *AliasMethod) Add(item Item) {
+	if item == nil {
 		return
 	}
-	this.rawProbability = append(this.rawProbability, p)
+	this.items = append(this.items, item)
 }
 
 func (this *AliasMethod) Prepare() error {
-	if len(this.rawProbability) == 0 {
+	if len(this.items) == 0 {
 		return errors.New("概率不能为空")
 	}
 
-	var total float64 = 0
-	for _, p := range this.rawProbability {
-		total += p.Probability()
+	var total = int32(0)
+	for _, item := range this.items {
+		total += item.Weight()
 	}
 
-	var scale = total / kProbability
+	var scale = float64(total) / kProbability
 
-	var values = make([]float64, 0, len(this.rawProbability))
-	for _, p := range this.rawProbability {
-		values = append(values, p.Probability()/scale)
+	var values = make([]float64, 0, len(this.items))
+	for _, item := range this.items {
+		values = append(values, float64(item.Weight())/scale)
 	}
 
 	this.preprocess(values)
@@ -134,28 +136,26 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 }
 
 func (this *AliasMethod) Next() int {
-	rand.Seed(time.Now().UnixNano())
-
 	var proLen = len(this.probability)
 	if proLen == 0 {
 		return -1
 	}
 
-	var column = rand.Intn(proLen)
-	var f = rand.Float64()
+	var c = this.r.Intn(proLen)
+	var f = this.r.Float64()
 
-	var coinToss = f < this.probability[column]
+	var coinToss = f < this.probability[c]
 
 	if coinToss {
-		return column
+		return c
 	}
-	return this.alias[column]
+	return this.alias[c]
 }
 
-func (this *AliasMethod) NextValue() interface{} {
+func (this *AliasMethod) NextItem() interface{} {
 	var index = this.Next()
 	if index < 0 {
 		return nil
 	}
-	return this.rawProbability[index]
+	return this.items[index]
 }
