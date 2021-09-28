@@ -12,7 +12,7 @@ const (
 )
 
 type Item interface {
-	Weight() int32
+	GetWeight() int32
 }
 
 type AliasMethod struct {
@@ -42,14 +42,14 @@ func (this *AliasMethod) Prepare() error {
 
 	var total = int32(0)
 	for _, item := range this.items {
-		total += item.Weight()
+		total += item.GetWeight()
 	}
 
 	var scale = float64(total) / kProbability
 
 	var values = make([]float64, 0, len(this.items))
 	for _, item := range this.items {
-		values = append(values, float64(item.Weight())/scale)
+		values = append(values, float64(item.GetWeight())/scale)
 	}
 
 	this.preprocess(values)

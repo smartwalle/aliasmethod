@@ -11,7 +11,7 @@ type Christmas struct {
 	weight int32
 }
 
-func (this *Christmas) Weight() int32 {
+func (this *Christmas) GetWeight() int32 {
 	return this.weight
 }
 
