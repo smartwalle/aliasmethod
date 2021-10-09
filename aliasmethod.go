@@ -52,12 +52,10 @@ func (this *AliasMethod) Prepare() error {
 		values = append(values, float64(item.GetWeight())/scale)
 	}
 
-	this.preprocess(values)
-
-	return nil
+	return this.process(values)
 }
 
-func (this *AliasMethod) preprocess(prob []float64) (err error) {
+func (this *AliasMethod) process(prob []float64) error {
 	var p = make([]float64, len(prob))
 	copy(p, prob)
 
@@ -132,7 +130,7 @@ func (this *AliasMethod) preprocess(prob []float64) (err error) {
 		large.Remove(largeElement)
 	}
 
-	return err
+	return nil
 }
 
 func (this *AliasMethod) Next() int {
