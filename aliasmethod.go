@@ -15,27 +15,27 @@ type Item interface {
 	GetWeight() int32
 }
 
-type AliasMethod struct {
+type AliasMethod[T Item] struct {
 	alias       []int
 	probability []float64
-	items       []Item
+	items       []T
 	r           *rand.Rand
 }
 
-func New() *AliasMethod {
-	var m = &AliasMethod{}
+func New[T Item]() *AliasMethod[T] {
+	var m = &AliasMethod[T]{}
 	m.r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	return m
 }
 
-func (this *AliasMethod) Add(item Item) {
-	if item == nil {
-		return
-	}
+func (this *AliasMethod[T]) Add(item T) {
+	//if item == nil {
+	//	return
+	//}
 	this.items = append(this.items, item)
 }
 
-func (this *AliasMethod) Prepare() error {
+func (this *AliasMethod[T]) Prepare() error {
 	if len(this.items) == 0 {
 		return errors.New("概率不能为空")
 	}
@@ -55,7 +55,7 @@ func (this *AliasMethod) Prepare() error {
 	return this.process(values)
 }
 
-func (this *AliasMethod) process(prob []float64) error {
+func (this *AliasMethod[T]) process(prob []float64) error {
 	var p = make([]float64, len(prob))
 	copy(p, prob)
 
@@ -133,13 +133,13 @@ func (this *AliasMethod) process(prob []float64) error {
 	return nil
 }
 
-func (this *AliasMethod) Next() int {
-	var proLen = len(this.probability)
-	if proLen == 0 {
+func (this *AliasMethod[T]) Next() int {
+	var pLen = len(this.probability)
+	if pLen == 0 {
 		return -1
 	}
 
-	var c = this.r.Intn(proLen)
+	var c = this.r.Intn(pLen)
 	var f = this.r.Float64()
 
 	var coinToss = f < this.probability[c]
@@ -150,10 +150,11 @@ func (this *AliasMethod) Next() int {
 	return this.alias[c]
 }
 
-func (this *AliasMethod) NextItem() interface{} {
+func (this *AliasMethod[T]) NextItem() T {
 	var index = this.Next()
-	if index < 0 {
-		return nil
+	var item T
+	if index >= 0 {
+		item = this.items[index]
 	}
-	return this.items[index]
+	return item
 }

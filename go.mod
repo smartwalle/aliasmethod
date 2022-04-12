@@ -1,3 +1,3 @@
 module github.com/smartwalle/aliasmethod
 
-go 1.12
+go 1.18

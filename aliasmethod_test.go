@@ -1,7 +1,6 @@
 package aliasmethod_test
 
 import (
-	"fmt"
 	"github.com/smartwalle/aliasmethod"
 	"testing"
 )
@@ -18,7 +17,7 @@ func (this *Christmas) GetWeight() int32 {
 func Test_AliasMethod(t *testing.T) {
 	var results = make(map[string]int)
 
-	var m = aliasmethod.New()
+	var m = aliasmethod.New[*Christmas]()
 
 	m.Add(&Christmas{name: "1", weight: 10})
 	m.Add(&Christmas{name: "2", weight: 10})
@@ -37,9 +36,9 @@ func Test_AliasMethod(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		var p = m.NextItem()
-		var c = p.(*Christmas)
-		results[c.name] = results[c.name] + 1
+		//var c = p.(*Christmas)
+		results[p.name] = results[p.name] + 1
 	}
 
-	fmt.Println(results)
+	t.Log(results)
 }
