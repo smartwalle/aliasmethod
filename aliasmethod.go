@@ -139,15 +139,15 @@ func (this *AliasMethod[T]) Next() int {
 		return -1
 	}
 
-	var c = this.r.Intn(pLen)
-	var f = this.r.Float64()
+	var index = this.r.Intn(pLen)
+	var value = this.r.Float64()
 
-	var coinToss = f < this.probability[c]
+	var coinToss = value < this.probability[index]
 
 	if coinToss {
-		return c
+		return index
 	}
-	return this.alias[c]
+	return this.alias[index]
 }
 
 func (this *AliasMethod[T]) NextItem() T {
