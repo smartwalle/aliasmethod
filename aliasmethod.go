@@ -16,10 +16,10 @@ type Item interface {
 }
 
 type AliasMethod[T Item] struct {
+	r           *rand.Rand
 	alias       []int
 	probability []float64
 	items       []T
-	r           *rand.Rand
 }
 
 func New[T Item]() *AliasMethod[T] {
