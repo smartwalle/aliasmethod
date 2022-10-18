@@ -36,7 +36,6 @@ func Test_AliasMethod(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		var p = m.NextItem()
-		//var c = p.(*Christmas)
 		results[p.name] = results[p.name] + 1
 	}
 
@@ -65,7 +64,6 @@ func BenchmarkAliasMethod_NextItem(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		var p = m.NextItem()
-		//var c = p.(*Christmas)
 		results[p.name] = results[p.name] + 1
 	}
 
