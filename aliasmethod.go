@@ -28,39 +28,39 @@ func New[T Item]() *AliasMethod[T] {
 	return m
 }
 
-func (this *AliasMethod[T]) Add(item T) {
+func (m *AliasMethod[T]) Add(item T) {
 	//if item == nil {
 	//	return
 	//}
-	this.items = append(this.items, item)
+	m.items = append(m.items, item)
 }
 
-func (this *AliasMethod[T]) Prepare() error {
-	if len(this.items) == 0 {
+func (m *AliasMethod[T]) Prepare() error {
+	if len(m.items) == 0 {
 		return errors.New("概率不能为空")
 	}
 
 	var total = int32(0)
-	for _, item := range this.items {
+	for _, item := range m.items {
 		total += item.GetWeight()
 	}
 
 	var scale = float64(total) / kProbability
 
-	var values = make([]float64, 0, len(this.items))
-	for _, item := range this.items {
+	var values = make([]float64, 0, len(m.items))
+	for _, item := range m.items {
 		values = append(values, float64(item.GetWeight())/scale)
 	}
 
-	return this.process(values)
+	return m.process(values)
 }
 
-func (this *AliasMethod[T]) process(prob []float64) error {
+func (m *AliasMethod[T]) process(prob []float64) error {
 	var p = make([]float64, len(prob))
 	copy(p, prob)
 
-	this.alias = make([]int, len(p))
-	this.probability = make([]float64, len(p))
+	m.alias = make([]int, len(p))
+	m.probability = make([]float64, len(p))
 
 	var average = kProbability / float64(len(p))
 
@@ -93,8 +93,8 @@ func (this *AliasMethod[T]) process(prob []float64) error {
 			more = v
 		}
 
-		this.probability[less] = p[less] * float64(len(p))
-		this.alias[less] = more
+		m.probability[less] = p[less] * float64(len(p))
+		m.alias[less] = more
 
 		p[more] = p[more] + p[less] - average
 
@@ -114,7 +114,7 @@ func (this *AliasMethod[T]) process(prob []float64) error {
 			break
 		}
 		if v, ok := smallElement.Value.(int); ok {
-			this.probability[v] = kProbability
+			m.probability[v] = kProbability
 		}
 		small.Remove(smallElement)
 	}
@@ -125,7 +125,7 @@ func (this *AliasMethod[T]) process(prob []float64) error {
 			break
 		}
 		if v, ok := largeElement.Value.(int); ok {
-			this.probability[v] = kProbability
+			m.probability[v] = kProbability
 		}
 		large.Remove(largeElement)
 	}
@@ -133,28 +133,28 @@ func (this *AliasMethod[T]) process(prob []float64) error {
 	return nil
 }
 
-func (this *AliasMethod[T]) Next() int {
-	var pLen = len(this.probability)
+func (m *AliasMethod[T]) Next() int {
+	var pLen = len(m.probability)
 	if pLen == 0 {
 		return -1
 	}
 
-	var index = this.r.Intn(pLen)
-	var value = this.r.Float64()
+	var index = m.r.Intn(pLen)
+	var value = m.r.Float64()
 
-	var coinToss = value < this.probability[index]
+	var coinToss = value < m.probability[index]
 
 	if coinToss {
 		return index
 	}
-	return this.alias[index]
+	return m.alias[index]
 }
 
-func (this *AliasMethod[T]) NextItem() T {
-	var index = this.Next()
+func (m *AliasMethod[T]) NextItem() T {
+	var index = m.Next()
 	var item T
 	if index >= 0 {
-		item = this.items[index]
+		item = m.items[index]
 	}
 	return item
 }
