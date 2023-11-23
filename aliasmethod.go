@@ -2,7 +2,6 @@ package aliasmethod
 
 import (
 	"container/list"
-	"errors"
 	"math/rand"
 	"time"
 )
@@ -29,15 +28,12 @@ func New[T Item]() *AliasMethod[T] {
 }
 
 func (m *AliasMethod[T]) Add(item T) {
-	//if item == nil {
-	//	return
-	//}
 	m.items = append(m.items, item)
 }
 
-func (m *AliasMethod[T]) Prepare() error {
+func (m *AliasMethod[T]) Prepare() bool {
 	if len(m.items) == 0 {
-		return errors.New("概率不能为空")
+		return false
 	}
 
 	var total = int32(0)
@@ -55,29 +51,29 @@ func (m *AliasMethod[T]) Prepare() error {
 	return m.process(values)
 }
 
-func (m *AliasMethod[T]) process(prob []float64) error {
+func (m *AliasMethod[T]) process(prob []float64) bool {
 	var p = make([]float64, len(prob))
 	copy(p, prob)
 
 	m.alias = make([]int, len(p))
 	m.probability = make([]float64, len(p))
 
-	var average = kProbability / float64(len(p))
+	var avg = kProbability / float64(len(p))
 
-	var small = list.New()
-	var large = list.New()
+	var smallList = list.New()
+	var largeList = list.New()
 
 	for index, value := range p {
-		if value >= average {
-			large.PushBack(index)
+		if value >= avg {
+			largeList.PushBack(index)
 		} else {
-			small.PushBack(index)
+			smallList.PushBack(index)
 		}
 	}
 
 	for {
-		var smallElement = small.Back()
-		var largeElement = large.Back()
+		var smallElement = smallList.Back()
+		var largeElement = largeList.Back()
 
 		if smallElement == nil || largeElement == nil {
 			break
@@ -96,41 +92,41 @@ func (m *AliasMethod[T]) process(prob []float64) error {
 		m.probability[less] = p[less] * float64(len(p))
 		m.alias[less] = more
 
-		p[more] = p[more] + p[less] - average
+		p[more] = p[more] + p[less] - avg
 
 		if p[more] >= kProbability/float64(len(p)) {
-			large.PushBack(more)
+			largeList.PushBack(more)
 		} else {
-			small.PushBack(more)
+			smallList.PushBack(more)
 		}
 
-		large.Remove(largeElement)
-		small.Remove(smallElement)
+		largeList.Remove(largeElement)
+		smallList.Remove(smallElement)
 	}
 
 	for {
-		var smallElement = small.Back()
+		var smallElement = smallList.Back()
 		if smallElement == nil {
 			break
 		}
 		if v, ok := smallElement.Value.(int); ok {
 			m.probability[v] = kProbability
 		}
-		small.Remove(smallElement)
+		smallList.Remove(smallElement)
 	}
 
 	for {
-		var largeElement = large.Back()
+		var largeElement = largeList.Back()
 		if largeElement == nil {
 			break
 		}
 		if v, ok := largeElement.Value.(int); ok {
 			m.probability[v] = kProbability
 		}
-		large.Remove(largeElement)
+		largeList.Remove(largeElement)
 	}
 
-	return nil
+	return true
 }
 
 func (m *AliasMethod[T]) Next() int {
@@ -142,9 +138,9 @@ func (m *AliasMethod[T]) Next() int {
 	var index = m.r.Intn(pLen)
 	var value = m.r.Float64()
 
-	var coinToss = value < m.probability[index]
+	var coin = value < m.probability[index]
 
-	if coinToss {
+	if coin {
 		return index
 	}
 	return m.alias[index]

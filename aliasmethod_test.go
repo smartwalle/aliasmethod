@@ -30,8 +30,8 @@ func Test_AliasMethod(t *testing.T) {
 	m.Add(Christmas{name: "9", weight: 10})
 	m.Add(Christmas{name: "10", weight: 110})
 
-	if err := m.Prepare(); err != nil {
-		t.Fatal(err)
+	if ok := m.Prepare(); !ok {
+		t.Fatal(ok)
 	}
 
 	for i := 0; i < 1000; i++ {
@@ -58,8 +58,8 @@ func BenchmarkAliasMethod_NextItem(b *testing.B) {
 	m.Add(Christmas{name: "9", weight: 10})
 	m.Add(Christmas{name: "10", weight: 110})
 
-	if err := m.Prepare(); err != nil {
-		b.Fatal(err)
+	if ok := m.Prepare(); !ok {
+		b.Fatal(ok)
 	}
 
 	for i := 0; i < b.N; i++ {
