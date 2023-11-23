@@ -15,10 +15,10 @@ type Item interface {
 }
 
 type AliasMethod[T Item] struct {
-	r           *rand.Rand
-	alias       []int
-	probability []float64
-	items       []T
+	r     *rand.Rand
+	alias []int     // 別名表
+	probs []float64 // 概率表
+	items []T
 }
 
 func New[T Item]() *AliasMethod[T] {
@@ -43,27 +43,24 @@ func (m *AliasMethod[T]) Prepare() bool {
 
 	var scale = float64(total) / kProbability
 
-	var values = make([]float64, 0, len(m.items))
+	var probs = make([]float64, 0, len(m.items))
 	for _, item := range m.items {
-		values = append(values, float64(item.GetWeight())/scale)
+		probs = append(probs, float64(item.GetWeight())/scale)
 	}
 
-	return m.process(values)
+	return m.process(probs)
 }
 
-func (m *AliasMethod[T]) process(prob []float64) bool {
-	var p = make([]float64, len(prob))
-	copy(p, prob)
+func (m *AliasMethod[T]) process(probs []float64) bool {
+	m.alias = make([]int, len(probs))
+	m.probs = make([]float64, len(probs))
 
-	m.alias = make([]int, len(p))
-	m.probability = make([]float64, len(p))
-
-	var avg = kProbability / float64(len(p))
+	var avg = kProbability / float64(len(probs))
 
 	var smallList = list.New()
 	var largeList = list.New()
 
-	for index, value := range p {
+	for index, value := range probs {
 		if value >= avg {
 			largeList.PushBack(index)
 		} else {
@@ -89,12 +86,12 @@ func (m *AliasMethod[T]) process(prob []float64) bool {
 			more = v
 		}
 
-		m.probability[less] = p[less] * float64(len(p))
+		m.probs[less] = probs[less] * float64(len(probs))
 		m.alias[less] = more
 
-		p[more] = p[more] + p[less] - avg
+		probs[more] = probs[more] + probs[less] - avg
 
-		if p[more] >= kProbability/float64(len(p)) {
+		if probs[more] >= kProbability/float64(len(probs)) {
 			largeList.PushBack(more)
 		} else {
 			smallList.PushBack(more)
@@ -110,7 +107,7 @@ func (m *AliasMethod[T]) process(prob []float64) bool {
 			break
 		}
 		if v, ok := smallElement.Value.(int); ok {
-			m.probability[v] = kProbability
+			m.probs[v] = kProbability
 		}
 		smallList.Remove(smallElement)
 	}
@@ -121,7 +118,7 @@ func (m *AliasMethod[T]) process(prob []float64) bool {
 			break
 		}
 		if v, ok := largeElement.Value.(int); ok {
-			m.probability[v] = kProbability
+			m.probs[v] = kProbability
 		}
 		largeList.Remove(largeElement)
 	}
@@ -130,7 +127,7 @@ func (m *AliasMethod[T]) process(prob []float64) bool {
 }
 
 func (m *AliasMethod[T]) Next() int {
-	var pLen = len(m.probability)
+	var pLen = len(m.probs)
 	if pLen == 0 {
 		return -1
 	}
@@ -138,8 +135,7 @@ func (m *AliasMethod[T]) Next() int {
 	var index = m.r.Intn(pLen)
 	var value = m.r.Float64()
 
-	var coin = value < m.probability[index]
-
+	var coin = value < m.probs[index]
 	if coin {
 		return index
 	}
