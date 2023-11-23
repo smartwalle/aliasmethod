@@ -52,10 +52,10 @@ func (m *AliasMethod[T]) Prepare() bool {
 }
 
 func (m *AliasMethod[T]) process(probs []float64) bool {
-	m.alias = make([]int, len(probs))
-	m.probs = make([]float64, len(probs))
-
-	var avg = kProbability / float64(len(probs))
+	var pLen = len(probs)
+	var avg = kProbability / float64(pLen)
+	m.alias = make([]int, pLen)
+	m.probs = make([]float64, pLen)
 
 	var smallList = list.New()
 	var largeList = list.New()
@@ -86,12 +86,12 @@ func (m *AliasMethod[T]) process(probs []float64) bool {
 			more = v
 		}
 
-		m.probs[less] = probs[less] * float64(len(probs))
+		m.probs[less] = probs[less] * float64(pLen)
 		m.alias[less] = more
 
 		probs[more] = probs[more] + probs[less] - avg
 
-		if probs[more] >= kProbability/float64(len(probs)) {
+		if probs[more] >= kProbability/float64(pLen) {
 			largeList.PushBack(more)
 		} else {
 			smallList.PushBack(more)
